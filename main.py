@@ -1,34 +1,19 @@
-# --- change this
-# Prüfmatrix bestimmen
-# input_list = [1 for i in range(0, 16)]
-# Prüfmatrix besser bestimmen
-input_list = [1] + [0 for i in range(1, 16)]
-# aufgabe 4.1.2 nutzwort
-# input_list = [1, 0, 0, 1, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0]
-# aufgabe 4.1.4 Codewort original
-# input_list = [1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 1, 1, 1, 1, 0]
-# aufgabe 4.1.4 Codewort korrigiert
-# input_list = [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 1, 1, 1, 0]
-# Aufgabe 4.2.2. Nutzwort
-# input_list = [1, 0, 0, 1, 1, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0]
-# Aufgabe 4.2.4 Test
-# input_list = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0]
+import os
+generator_poly_file_name = "generator_polynom"
+input_poly_file_name = "input_polynom"
 
-# Test Input
-# input_list = [1, 1, 0, 1, 1, 1, 0, 0]
-# input_list = [1 for i in range(0, 8)]
+def intify(string_list):
+    """Takes list of string and turns it into ints"""
+    return [int(s) for s in string_list]
 
-# polynom Aufgabe 8.5 (nicht primitiv)
-division_polynom = [1, 1, 1, 0, 0]
+with open(generator_poly_file_name, "r") as generator_poly_file:
+    division_polynom = intify(generator_poly_file.read().split())
 
-# polynom Aufgabe 4.1
-# division_polynom = [1, 0, 1, 0, 1]
+with open(input_poly_file_name, "r") as input_poly_file:
+    input_list = intify(input_poly_file.read().split())
 
-# polynom Aufgabe 4.2
-# division_polynom = [1, 0, 0, 1]
-
-# polynom Test
-#division_polynom = [0, 1, 1]
+# input_list = [1] + [0 for i in range(1, 16)]
+# division_polynom = [1, 1, 1, 0, 0]
 
 num_regs = len(division_polynom)
 # change till here
@@ -41,8 +26,6 @@ def poly_xor(a, feedback, poly):
     else:
         return a
 
-# -------------------------------------------
-
 def list_xor(list1, list2):
     if len(list1) != len(list2):
         raise ValueError("Lists have differing length")
@@ -51,10 +34,14 @@ def list_xor(list1, list2):
         ret_list.append(poly_xor(list1[i], list2[i], 1))
     return ret_list
 
+
 registers = [0 for i in range(num_regs)]
 takt = 0
+
+output_list = []
 for input_number in input_list:
-    print(str(takt) + " " + str(registers) + " " + str(input_number))
+    if takt != 0:
+        output_list += registers
     takt += 1
     feedback = registers[0]
     new_registers = [None] * len(registers)
@@ -65,4 +52,18 @@ for input_number in input_list:
     test_scheme = list_xor(registers, new_registers)
     # print("Prüfschema-Spalte: %s" % "".join([str(i) for i in test_scheme]))
     registers = new_registers
+
+print(output_list.reverse())
+
+output_file_identifier = open("output.tex", "w+")
+for i in range(0, len(division_polynom)):
+    for k in range(0, len(input_list) - 1):
+        index = len(division_polynom) - 1 - i + len(division_polynom)*k
+        print(index)
+        output_file_identifier.write(str(output_list[index]))
+        if k != len(input_list) - 1:
+            output_file_identifier.write(" & ")
+    if i != len(division_polynom) - 1:
+        output_file_identifier.write("\\\\ \n")
+output_file_identifier.close()
 
